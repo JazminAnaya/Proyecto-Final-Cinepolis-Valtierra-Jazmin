@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "417951243475",
+    "project_id": "proyectofinalcinepolis",
+    "storage_bucket": "proyectofinalcinepolis.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:417951243475:android:6d87cef00a642350934826",
+        "android_client_info": {
+          "package_name": "com.cinepolis.myapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCdKTnfqe-4AQJc2ya7AUApx_Apskm70B0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
