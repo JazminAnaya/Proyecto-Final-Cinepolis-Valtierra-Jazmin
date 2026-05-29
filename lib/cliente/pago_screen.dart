@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:myapp/cliente/cliente_home_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -407,6 +408,10 @@ class _PagoScreenState extends State<PagoScreen> {
                                         Icons.credit_card,
                                         TextInputType.number,
                                         isObscure: false,
+                                        inputFormatters: [
+                                          FilteringTextInputFormatter.digitsOnly,
+                                          LengthLimitingTextInputFormatter(16),
+                                        ],
                                       ),
                                       const SizedBox(height: 12),
                                       Row(
@@ -416,8 +421,11 @@ class _PagoScreenState extends State<PagoScreen> {
                                               _fechaController,
                                               'MM/AA',
                                               Icons.calendar_today,
-                                              TextInputType.datetime,
+                                              TextInputType.number,
                                               isObscure: false,
+                                              inputFormatters: [
+                                                _CardExpirationFormatter(),
+                                              ],
                                             ),
                                           ),
                                           const SizedBox(width: 12),
@@ -428,6 +436,10 @@ class _PagoScreenState extends State<PagoScreen> {
                                               Icons.security,
                                               TextInputType.number,
                                               isObscure: true,
+                                              inputFormatters: [
+                                                FilteringTextInputFormatter.digitsOnly,
+                                                LengthLimitingTextInputFormatter(4),
+                                              ],
                                             ),
                                           ),
                                         ],
@@ -492,11 +504,13 @@ class _PagoScreenState extends State<PagoScreen> {
     IconData icon,
     TextInputType keyboardType, {
     bool isObscure = false,
+    List<TextInputFormatter>? inputFormatters,
   }) {
     return TextFormField(
       controller: controller,
       obscureText: isObscure,
       keyboardType: keyboardType,
+      inputFormatters: inputFormatters,
       decoration: InputDecoration(
         labelText: label,
         prefixIcon: Icon(icon, color: const Color(0xFF0D47A1)),
@@ -519,6 +533,48 @@ class _PagoScreenState extends State<PagoScreen> {
         }
         return null;
       },
+    );
+  }
+}
+
+class _CardExpirationFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue,
+    TextEditingValue newValue,
+  ) {
+    final text = newValue.text;
+    
+    // If deletion is happening, let it happen naturally
+    if (oldValue.text.length >= text.length) {
+      return newValue;
+    }
+
+    // Strip any non-digit character
+    var cleanText = text.replaceAll(RegExp(r'\D'), '');
+
+    // Prepend '0' if the first digit typed is between 2 and 9 (inclusive)
+    if (cleanText.isNotEmpty) {
+      final firstDigit = int.tryParse(cleanText[0]);
+      if (firstDigit != null && firstDigit > 1) {
+        cleanText = '0$cleanText';
+      }
+    }
+
+    // Limit to 4 digits total (MMYY)
+    final limitedText = cleanText.length > 4 ? cleanText.substring(0, 4) : cleanText;
+
+    var formattedText = '';
+    if (limitedText.isNotEmpty) {
+      formattedText += limitedText.substring(0, limitedText.length < 2 ? limitedText.length : 2);
+    }
+    if (limitedText.length > 2) {
+      formattedText += '/${limitedText.substring(2)}';
+    }
+
+    return TextEditingValue(
+      text: formattedText,
+      selection: TextSelection.collapsed(offset: formattedText.length),
     );
   }
 }
